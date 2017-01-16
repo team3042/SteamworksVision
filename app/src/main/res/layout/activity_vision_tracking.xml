@@ -30,8 +30,7 @@
         android:id="@+id/yPos"
         android:layout_alignEnd="@+id/xPos"
         android:hint="Y Coordinate"
-        style="@android:style/Widget.Material.EditText"
-        android:text="Y:" />
+        style="@android:style/Widget.Material.EditText" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -43,8 +42,7 @@
         android:hint="X Coordinate"
         style="@android:style/Widget.Material.EditText"
         android:layout_below="@+id/isConnected"
-        android:layout_alignParentStart="true"
-        android:text="X:" />
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -56,8 +54,7 @@
         android:layout_marginTop="25dp"
         android:id="@+id/timestamp"
         android:hint="ms"
-        style="@android:style/Widget.Material.EditText"
-        android:text="ms:" />
+        style="@android:style/Widget.Material.EditText" />
 
     <Button
         android:text="Send Test Message"

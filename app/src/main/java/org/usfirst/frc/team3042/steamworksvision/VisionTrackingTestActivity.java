@@ -1,7 +1,7 @@
 package org.usfirst.frc.team3042.steamworksvision;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -30,12 +30,12 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
         final Button messageButton = (Button) findViewById(R.id.sendMessage);
         messageButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                int x = Integer.parseInt(xPos.getText().toString());
-                int y = Integer.parseInt(yPos.getText().toString());
-                int time = Integer.parseInt(timestamp.getText().toString());
+                int x = (isInteger(xPos.getText().toString()))? Integer.parseInt(xPos.getText().toString()) : 0;
+                int y = (isInteger(yPos.getText().toString()))? Integer.parseInt(yPos.getText().toString()) : 0;
+                int time = (isInteger(timestamp.getText().toString()))? Integer.parseInt(timestamp.getText().toString()) : 0;
 
                 TargetInfo testTarget = new TargetInfo(x, y);
-                VisionUpdate testUpdate = new VisionUpdate(time);
+                VisionUpdate testUpdate = new VisionUpdate(0);
                 testUpdate.addCameraTargetInfo(testTarget);
 
                 TargetUpdateMessage testMessage = new TargetUpdateMessage(testUpdate, time);
@@ -57,5 +57,17 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    public static boolean isInteger(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch(NumberFormatException e) {
+            return false;
+        } catch(NullPointerException e) {
+            return false;
+        }
+        // only got here if we didn't return false
+        return true;
     }
 }

@@ -2,9 +2,7 @@ package org.usfirst.frc.team3042.steamworksvision.communication;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.TextView;
 
-import org.usfirst.frc.team3042.steamworksvision.R;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.HeartbeatMessage;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.OffWireMessage;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.VisionMessage;
@@ -241,6 +239,7 @@ public class RobotConnection {
     }
 
     public synchronized boolean send(VisionMessage message) {
+        Log.w("RobotConnection", "Message sent(type: " + message.getType() + ", message: " + message.getMessage() + ")");
         return toSend.offer(message);
     }
 }
