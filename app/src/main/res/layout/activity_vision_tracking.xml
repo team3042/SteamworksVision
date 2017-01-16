@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_vision_tracking"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="org.usfirst.frc.team3042.steamworksvision.VisionTrackingTestActivity">
+
+    <TextView
+        android:text="@string/not_connected"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/isConnected"
+        android:textAppearance="@android:style/TextAppearance.Material.Large"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:layout_below="@+id/xPos"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="22dp"
+        android:id="@+id/yPos"
+        android:layout_alignEnd="@+id/xPos"
+        android:hint="Y Coordinate"
+        style="@android:style/Widget.Material.EditText"
+        android:text="Y:" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:layout_marginTop="45dp"
+        android:id="@+id/xPos"
+        android:hint="X Coordinate"
+        style="@android:style/Widget.Material.EditText"
+        android:layout_below="@+id/isConnected"
+        android:layout_alignParentStart="true"
+        android:text="X:" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:layout_below="@+id/yPos"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="25dp"
+        android:id="@+id/timestamp"
+        android:hint="ms"
+        style="@android:style/Widget.Material.EditText"
+        android:text="ms:" />
+
+    <Button
+        android:text="Send Test Message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/timestamp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="72dp"
+        android:layout_marginTop="12dp"
+        android:id="@+id/sendMessage" />
+
+</RelativeLayout>

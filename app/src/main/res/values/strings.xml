@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Steamworks Vision</string>
+
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="not_connected">Not Connected</string>
+</resources>
