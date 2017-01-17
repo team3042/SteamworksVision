@@ -7,6 +7,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
+import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
 import org.usfirst.frc.team3042.steamworksvision.communication.TargetInfo;
 import org.usfirst.frc.team3042.steamworksvision.communication.VisionUpdate;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.TargetUpdateMessage;
@@ -14,6 +16,7 @@ import org.usfirst.frc.team3042.steamworksvision.communication.messages.TargetUp
 public class VisionTrackingTestActivity extends AppCompatActivity {
 
     TextView isConnected;
+    RobotConnectionStatusBroadcastReceiver connectionReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +24,8 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
         setContentView(R.layout.activity_vision_tracking);
 
         isConnected = (TextView)findViewById(R.id.isConnected);
+
+        connectionReceiver = new RobotConnectionStatusBroadcastReceiver(AppContext.getDefaultContext(), new ConnectionTracker());
 
         final EditText xPos = (EditText)findViewById(R.id.xPos);
         final EditText yPos = (EditText)findViewById(R.id.yPos);
@@ -44,18 +49,17 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
         });
     }
 
-    protected class ConnectionTracker implements Runnable {
+    // Changes text when connection status updates
+    protected class ConnectionTracker implements RobotConnectionStateListener {
 
         @Override
-        public void run() {
-            while(true) {
-                boolean connected = AppContext.getRobotConnection().isConnected();
-                if(connected) {
-                    isConnected.setText("Connected");
-                } else {
-                    isConnected.setText("Not Connected");
-                }
-            }
+        public void robotConnected() {
+            isConnected.setText("Connected");
+        }
+
+        @Override
+        public void robotDisconnected() {
+            isConnected.setText("Not Connected");
         }
     }
 

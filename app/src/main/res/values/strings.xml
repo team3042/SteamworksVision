@@ -4,4 +4,8 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="not_connected">Not Connected</string>
+    <string name="send_test_message">Send Test Message</string>
+    <string name="x_coordinate">X Coordinate</string>
+    <string name="y_coordinate">Y Coordinate</string>
+    <string name="ms">ms</string>
 </resources>
