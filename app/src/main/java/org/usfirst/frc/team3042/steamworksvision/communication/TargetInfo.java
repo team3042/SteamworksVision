@@ -5,13 +5,14 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-// Used to store information about detected targets
+// Used to store information about detected targets, to be processed on the roboRIO
 public class TargetInfo {
-    protected double x, y;
+    protected double x, y, distance;
 
-    public TargetInfo(double x, double y) {
+    public TargetInfo(double x, double y, double distance) {
         this.x = x;
         this.y = y;
+        this.distance = distance;
     }
 
     private double doubleize(double value) {
@@ -28,6 +29,10 @@ public class TargetInfo {
 
     public double getY() {
         return y;
+    }
+
+    public double getDistance() {
+        return distance;
     }
 
     public JSONObject toJson() {

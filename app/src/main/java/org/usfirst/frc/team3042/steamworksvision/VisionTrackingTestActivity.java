@@ -39,7 +39,7 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
                 int y = (isInteger(yPos.getText().toString()))? Integer.parseInt(yPos.getText().toString()) : 0;
                 int time = (isInteger(timestamp.getText().toString()))? Integer.parseInt(timestamp.getText().toString()) : 0;
 
-                TargetInfo testTarget = new TargetInfo(x, y);
+                TargetInfo testTarget = new TargetInfo(x, y, 0);
                 VisionUpdate testUpdate = new VisionUpdate(0);
                 testUpdate.addCameraTargetInfo(testTarget);
 
@@ -59,7 +59,7 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
 
         @Override
         public void robotDisconnected() {
-            isConnected.setText("Not Connected!");
+            isConnected.setText("Not Connected");
         }
     }
 
