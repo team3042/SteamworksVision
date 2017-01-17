@@ -59,7 +59,7 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
 
         @Override
         public void robotDisconnected() {
-            isConnected.setText("Not Connected");
+            isConnected.setText("Not Connected!");
         }
     }
 

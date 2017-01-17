@@ -1,6 +1,7 @@
 package org.usfirst.frc.team3042.steamworksvision.communication;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.HeartbeatMessage;
@@ -129,10 +130,12 @@ public class RobotConnection {
                     // Update connected status if it is incorrect (response taking longer than threshold)
                     if(Math.abs(lastHeartbeatReceived - lastHeartbeatSent) > THRESHOLD_HEARTBEAT && connected) {
                         connected = false;
+                        broadcastRobotDisconnected();
                     }
 
                     if(Math.abs(lastHeartbeatReceived - lastHeartbeatSent) < THRESHOLD_HEARTBEAT && !connected) {
                         connected = true;
+                        broadcastRobotConnected();
                     }
 
                     Thread.sleep(CONNECTOR_SLEEP_MS, 0);
@@ -241,5 +244,15 @@ public class RobotConnection {
     public synchronized boolean send(VisionMessage message) {
         Log.w("RobotConnection", "Message sent(type: " + message.getType() + ", message: " + message.getMessage() + ")");
         return toSend.offer(message);
+    }
+
+    public void broadcastRobotConnected() {
+        Intent i = new Intent(RobotConnectionStatusBroadcastReceiver.ACTION_ROBOT_CONNECTED);
+        context.sendBroadcast(i);
+    }
+
+    public void broadcastRobotDisconnected() {
+        Intent i = new Intent(RobotConnectionStatusBroadcastReceiver.ACTION_ROBOT_DISCONNECTED);
+        context.sendBroadcast(i);
     }
 }
