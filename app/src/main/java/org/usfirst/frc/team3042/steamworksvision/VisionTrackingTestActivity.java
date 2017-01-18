@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
@@ -45,6 +46,12 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
 
                 TargetUpdateMessage testMessage = new TargetUpdateMessage(testUpdate, time);
                 AppContext.getRobotConnection().send(testMessage);
+            }
+        });
+
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(AppContext.getDefaultContext(), "Could not connect", Toast.LENGTH_SHORT);
             }
         });
     }

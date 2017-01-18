@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class RobotConnection {
 
     public static final int ROBOT_PORT = 3042;
-    public static final String ROBOT_PROXY_HOST = "localhost";
+    public static final String ROBOT_PROXY_HOST = "127.0.0.1";
     public static final int CONNECTOR_SLEEP_MS = 100;
     public static final int THRESHOLD_HEARTBEAT = 800;
     public static final int SEND_HEARTBEAT_PERIOD = 100;

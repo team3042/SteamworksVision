@@ -2,6 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.usfirst.frc.team3042.steamworksvision">
 
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:name=".AppContext"
         android:allowBackup="true"
@@ -21,5 +22,6 @@
             </intent-filter>
         </activity>
     </application>
+
 
 </manifest>
