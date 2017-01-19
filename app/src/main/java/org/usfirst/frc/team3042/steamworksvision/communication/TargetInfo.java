@@ -40,6 +40,7 @@ public class TargetInfo {
         try {
             j.put("x", doubleize(getX()));
             j.put("y", doubleize(getY()));
+            j.put("distance", doubleize(getDistance()));
         } catch (JSONException e) {
             Log.e("TargetInfo", "Could not encode Json");
         }

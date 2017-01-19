@@ -41,10 +41,15 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
                 int time = (isInteger(timestamp.getText().toString()))? Integer.parseInt(timestamp.getText().toString()) : 0;
 
                 TargetInfo testTarget = new TargetInfo(x, y, 0);
-                VisionUpdate testUpdate = new VisionUpdate(0);
+                VisionUpdate testUpdate = new VisionUpdate(System.nanoTime());
                 testUpdate.addCameraTargetInfo(testTarget);
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
-                TargetUpdateMessage testMessage = new TargetUpdateMessage(testUpdate, time);
+                TargetUpdateMessage testMessage = new TargetUpdateMessage(testUpdate, System.nanoTime());
                 AppContext.getRobotConnection().send(testMessage);
             }
         });
