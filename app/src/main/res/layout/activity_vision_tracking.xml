@@ -10,60 +10,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="org.usfirst.frc.team3042.steamworksvision.VisionTrackingTestActivity">
 
-    <TextView
-        android:text="@string/not_connected"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/isConnected"
-        android:textAppearance="@android:style/TextAppearance.Material.Large"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:layout_below="@+id/xPos"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="22dp"
-        android:id="@+id/yPos"
-        android:layout_alignEnd="@+id/xPos"
-        android:hint="@string/y_coordinate"
-        style="@android:style/Widget.Material.EditText" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:layout_marginTop="45dp"
-        android:id="@+id/xPos"
-        android:hint="@string/x_coordinate"
-        style="@android:style/Widget.Material.EditText"
-        android:layout_below="@+id/isConnected"
-        android:layout_alignParentStart="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:layout_below="@+id/yPos"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="25dp"
-        android:id="@+id/timestamp"
-        android:hint="@string/ms"
-        style="@android:style/Widget.Material.EditText" />
-
-    <Button
-        android:text="@string/send_test_message"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/timestamp"
-        android:layout_alignParentEnd="true"
-        android:layout_marginEnd="72dp"
-        android:layout_marginTop="12dp"
-        android:id="@+id/sendMessage" />
+    <org.usfirst.frc.team3042.steamworksvision.VisionGLSurfaceView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/my_gl_surface_view" />
 
 </RelativeLayout>

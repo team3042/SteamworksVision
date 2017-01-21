@@ -3,6 +3,7 @@
     package="org.usfirst.frc.team3042.steamworksvision">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:name=".AppContext"
         android:allowBackup="true"
@@ -12,6 +13,7 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".VisionTrackingTestActivity"
+            android:screenOrientation="landscape"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@style/FullscreenTheme">

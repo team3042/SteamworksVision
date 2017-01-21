@@ -1,25 +1,31 @@
 package org.usfirst.frc.team3042.steamworksvision;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
+import android.app.Fragment;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.opencv.android.OpenCVLoader;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
-import org.usfirst.frc.team3042.steamworksvision.communication.TargetInfo;
-import org.usfirst.frc.team3042.steamworksvision.communication.VisionUpdate;
-import org.usfirst.frc.team3042.steamworksvision.communication.messages.TargetUpdateMessage;
 
 public class VisionTrackingTestActivity extends AppCompatActivity {
 
+    private static final int REQUEST_CAMERA_PERMISSION = 1;
+    private static final String FRAGMENT_DIALOG = "dialog";
+
     TextView isConnected;
     RobotConnectionStatusBroadcastReceiver connectionReceiver;
+    private VisionGLSurfaceView view;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +38,8 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
             Log.d(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), working.");
         }
 
+        tryStartCamera();
+        /*
         isConnected = (TextView)findViewById(R.id.isConnected);
 
         connectionReceiver = new RobotConnectionStatusBroadcastReceiver(AppContext.getDefaultContext(), new ConnectionTracker());
@@ -67,6 +75,61 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
                 Toast.makeText(AppContext.getDefaultContext(), "Could not connect", Toast.LENGTH_SHORT);
             }
         });
+        */
+    }
+
+    /**
+     * Shows OK/Cancel confirmation dialog about camera permission.
+     */
+    public static class ConfirmationDialog extends DialogFragment {
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            final Fragment parent = getParentFragment();
+            return new AlertDialog.Builder(getActivity())
+                    .setMessage("This app needs camera permission")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(parent.getActivity(),
+                                    new String[]{Manifest.permission.CAMERA},
+                                    REQUEST_CAMERA_PERMISSION);
+                        }
+                    })
+                    .setNegativeButton(android.R.string.cancel,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Activity activity = parent.getActivity();
+                                    if (activity != null) {
+                                        activity.finish();
+                                    }
+                                }
+                            })
+                    .create();
+        }
+    }
+
+    private void requestCameraPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            new ConfirmationDialog().show(this.getFragmentManager(), FRAGMENT_DIALOG);
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+                    REQUEST_CAMERA_PERMISSION);
+        }
+    }
+
+    private void tryStartCamera() {
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestCameraPermission();
+            return;
+        }
+
+        view = (VisionGLSurfaceView) findViewById(R.id.my_gl_surface_view);
+        //view.setCameraTextureListener(view);
+        //view.setPreferences(prefs);
     }
 
     // Changes text when connection status updates
@@ -74,12 +137,12 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
 
         @Override
         public void robotConnected() {
-            isConnected.setText("Connected");
+            //isConnected.setText("Connected");
         }
 
         @Override
         public void robotDisconnected() {
-            isConnected.setText("Not Connected");
+            //isConnected.setText("Not Connected");
         }
     }
 

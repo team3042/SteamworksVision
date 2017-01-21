@@ -1,13 +1,7 @@
 package org.opencv.android;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
-
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Camera;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -23,6 +17,11 @@ import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
 import android.view.Surface;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 @TargetApi(21)
 public class BetterCamera2Renderer extends BetterCameraGLRendererBase {
@@ -268,29 +267,29 @@ public class BetterCamera2Renderer extends BetterCameraGLRendererBase {
             mPreviewRequestBuilder.addTarget(surface);
 
             mCameraDevice.createCaptureSession(Arrays.asList(surface),
-                    new CameraCaptureSession.StateCallback() {
-                        @Override
-                        public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-                            mCaptureSession = cameraCaptureSession;
-                            try {
-                                for (Map.Entry<CaptureRequest.Key, ?> setting : mSettings.camera_settings.entrySet()) {
-                                    mPreviewRequestBuilder.set(setting.getKey(), setting.getValue());
-                                }
-                                mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
-                                Log.i(LOGTAG, "CameraPreviewSession has been started");
-                            } catch (CameraAccessException e) {
-                                Log.e(LOGTAG, "createCaptureSession failed");
+                new CameraCaptureSession.StateCallback() {
+                    @Override
+                    public void onConfigured(CameraCaptureSession cameraCaptureSession) {
+                        mCaptureSession = cameraCaptureSession;
+                        try {
+                            for (Map.Entry<CaptureRequest.Key, ?> setting : mSettings.camera_settings.entrySet()) {
+                                mPreviewRequestBuilder.set(setting.getKey(), setting.getValue());
                             }
-                            mCameraOpenCloseLock.release();
+                            mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(), mCaptureCallback, mBackgroundHandler);
+                            Log.i(LOGTAG, "CameraPreviewSession has been started");
+                        } catch (CameraAccessException e) {
+                            Log.e(LOGTAG, "createCaptureSession failed");
                         }
+                        mCameraOpenCloseLock.release();
+                    }
 
-                        @Override
-                        public void onConfigureFailed(
-                                CameraCaptureSession cameraCaptureSession) {
-                            Log.e(LOGTAG, "createCameraPreviewSession failed");
-                            mCameraOpenCloseLock.release();
-                        }
-                    }, mBackgroundHandler);
+                    @Override
+                    public void onConfigureFailed(
+                            CameraCaptureSession cameraCaptureSession) {
+                        Log.e(LOGTAG, "createCameraPreviewSession failed");
+                        mCameraOpenCloseLock.release();
+                    }
+                }, mBackgroundHandler);
         } catch (CameraAccessException e) {
             Log.e(LOGTAG, "createCameraPreviewSession");
         } catch (InterruptedException e) {
