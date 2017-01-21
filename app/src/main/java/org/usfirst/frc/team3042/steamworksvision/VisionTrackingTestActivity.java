@@ -2,12 +2,14 @@ package org.usfirst.frc.team3042.steamworksvision;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.opencv.android.OpenCVLoader;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
 import org.usfirst.frc.team3042.steamworksvision.communication.TargetInfo;
@@ -23,6 +25,12 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vision_tracking);
+
+        if (!OpenCVLoader.initDebug()) {
+            Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
+        } else {
+            Log.d(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), working.");
+        }
 
         isConnected = (TextView)findViewById(R.id.isConnected);
 
