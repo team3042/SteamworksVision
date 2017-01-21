@@ -18,7 +18,7 @@ import org.opencv.android.OpenCVLoader;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
 
-public class VisionTrackingTestActivity extends AppCompatActivity {
+public class VisionTrackingTestActivity extends AppCompatActivity implements RobotConnectionStateListener {
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
@@ -128,22 +128,18 @@ public class VisionTrackingTestActivity extends AppCompatActivity {
         }
 
         view = (VisionGLSurfaceView) findViewById(R.id.my_gl_surface_view);
-        //view.setCameraTextureListener(view);
+        view.setCameraTextureListener(view);
         //view.setPreferences(prefs);
     }
 
-    // Changes text when connection status updates
-    protected class ConnectionTracker implements RobotConnectionStateListener {
+    @Override
+    public void robotConnected() {
+        view.setRobotConnection(AppContext.getRobotConnection());
+    }
 
-        @Override
-        public void robotConnected() {
-            //isConnected.setText("Connected");
-        }
-
-        @Override
-        public void robotDisconnected() {
-            //isConnected.setText("Not Connected");
-        }
+    @Override
+    public void robotDisconnected() {
+        view.setRobotConnection(null);
     }
 
     public static boolean isInteger(String s) {
