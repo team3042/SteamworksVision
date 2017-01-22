@@ -25,6 +25,9 @@ import static org.opencv.core.CvType.CV_8UC4;
 
 public class OpenCVUtils {
 
+    private static final double MIN_AREA = 300;
+    private static final double MIN_STENCIL_SIMILARITY = 0.2;
+
     private static Mat stencil;
     private static Mat contoursFrame;
 
@@ -152,7 +155,7 @@ public class OpenCVUtils {
     }
 
     private static List<MatOfPoint> getContours(Mat image) {
-        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        List<MatOfPoint> contours = new ArrayList<>();
         Imgproc.findContours(image, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         return contours;
@@ -164,11 +167,11 @@ public class OpenCVUtils {
             MatOfPoint currentContour = contours.get(i);
 
             //Filtering out small contours
-            if(Imgproc.contourArea(currentContour) > 100) { //TODO Add constant
+            if(Imgproc.contourArea(currentContour) > MIN_AREA) {
                 //Calculating similarity to the u shape of the goal
                 double similarity = Imgproc.matchShapes(currentContour, stencil, Imgproc.CV_CONTOURS_MATCH_I3, 0);
                 System.out.println(similarity);
-                if(similarity < 20) {
+                if(similarity < MIN_STENCIL_SIMILARITY) {
                     similarities[i] = similarity;
                 }
                 else similarities[i] = 1000;

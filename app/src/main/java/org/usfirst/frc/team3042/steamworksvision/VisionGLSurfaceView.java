@@ -81,7 +81,13 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
         ArrayList<TargetInfo> targets = OpenCVUtils.processImage(texIn, texOut, width, height, lowerH, upperH, lowerS, upperS, lowerV, upperV);
 
         for(int i = 0; i < targets.size(); i++) {
-            visionUpdate.addCameraTargetInfo(targets.get(i));
+            TargetInfo currentTarget = targets.get(i);
+
+            double x = Math.atan((currentTarget.getX() - kCenterCol) / getFocalLengthPixels());
+            double y = Math.atan((currentTarget.getY() - kCenterRow) / getFocalLengthPixels());
+
+            visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, currentTarget.getDistance()));
+            Log.i(LOGTAG, "Target at: " + x + ", " + y);
         }
 
         if (robotConnection != null) {
