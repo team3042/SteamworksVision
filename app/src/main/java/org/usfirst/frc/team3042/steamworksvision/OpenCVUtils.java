@@ -44,7 +44,7 @@ public class OpenCVUtils {
     private static double x, y, distance;
 
     public static ArrayList<TargetInfo> processImage(int texIn, int texOut, int width, int height, int lowerH, int upperH,
-                                              int lowerS, int upperS, int lowerV, int upperV) {
+                                              int lowerS, int upperS, int lowerV, int upperV, boolean outputHSVFrame) {
         ArrayList<TargetInfo> targets = new ArrayList<>();
         stencil = new Mat(8, 1, CvType.CV_32SC2);
         stencil.put(0, 0, new int[]{/*p1*/0, 0, /*p2*/ 0, 50, /*p3*/ 20, 50, /*p4*/ 20, 0});
@@ -84,10 +84,18 @@ public class OpenCVUtils {
         Imgproc.cvtColor(contoursFrame, contoursFrame, Imgproc.COLOR_BGR2BGRA);
 
         // Outputting Mat to the screen
-        Core.bitwise_or(contoursFrame, input, input);
-        byte[] output = new byte[input.rows() * input.cols() * input.channels()];
-        input.get(0, 0, output);
-        ByteBuffer outBuffer = ByteBuffer.wrap(output);
+        ByteBuffer outBuffer;
+
+        if(outputHSVFrame) {
+            byte[] output = new byte[dilatedFrame.rows() * dilatedFrame.cols() * dilatedFrame.channels()];
+            dilatedFrame.get(0, 0, output);
+            outBuffer = ByteBuffer.wrap(output);
+        } else {
+            Core.bitwise_or(contoursFrame, input, input);
+            byte[] output = new byte[input.rows() * input.cols() * input.channels()];
+            input.get(0, 0, output);
+            outBuffer = ByteBuffer.wrap(output);
+        }
 
         GLES20.glActiveTexture(GL_TEXTURE0);
         GLES20.glBindTexture(GL_TEXTURE_2D, texOut);

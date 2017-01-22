@@ -4,6 +4,7 @@ import android.content.Context;
 import android.hardware.camera2.CaptureRequest;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 
 import org.opencv.android.BetterCamera2Renderer;
 import org.opencv.android.BetterCameraGLSurfaceView;
@@ -25,16 +26,11 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
     static final double kCenterCol = ((double) kWidth) / 2.0 - .5;
     static final double kCenterRow = ((double) kHeight) / 2.0 - .5;
 
-    static final int lowerH = 0;
-    static final int upperH = 95;
-    static final int lowerS = 62;
-    static final int upperS = 255;
-    static final int lowerV = 57;
-    static final int upperV = 255;
-
     protected int frameCounter;
     protected long lastNanoTime;
     private RobotConnection robotConnection;
+    private Preferences prefs;
+    protected boolean outputHSVFrame = false;
 
     static BetterCamera2Renderer.Settings getCameraSettings() {
         BetterCamera2Renderer.Settings settings = new BetterCamera2Renderer.Settings();
@@ -51,6 +47,10 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
 
     public VisionGLSurfaceView(Context context, AttributeSet attrs) {
         super(context, attrs, getCameraSettings());
+    }
+
+    public void setOutputHSVFrame(boolean outputFrame) {
+        outputHSVFrame = outputFrame;
     }
 
     @Override
@@ -78,7 +78,12 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
 
         VisionUpdate visionUpdate = new VisionUpdate(image_timestamp);
 
-        ArrayList<TargetInfo> targets = OpenCVUtils.processImage(texIn, texOut, width, height, lowerH, upperH, lowerS, upperS, lowerV, upperV);
+        Pair<Integer, Integer> hRange = prefs != null ? prefs.getThresholdHRange() : blankPair();
+        Pair<Integer, Integer> sRange = prefs != null ? prefs.getThresholdSRange() : blankPair();
+        Pair<Integer, Integer> vRange = prefs != null ? prefs.getThresholdVRange() : blankPair();
+
+        ArrayList<TargetInfo> targets = OpenCVUtils.processImage(texIn, texOut, width, height, hRange.first, hRange.second,
+                sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
 
         for(int i = 0; i < targets.size(); i++) {
             TargetInfo currentTarget = targets.get(i);
@@ -100,5 +105,13 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
 
     public void setRobotConnection(RobotConnection robotConnection) {
         this.robotConnection = robotConnection;
+    }
+
+    public void setPreferences(Preferences prefs) {
+        this.prefs = prefs;
+    }
+
+    private static Pair<Integer, Integer> blankPair() {
+        return new Pair<Integer, Integer>(0, 255);
     }
 }

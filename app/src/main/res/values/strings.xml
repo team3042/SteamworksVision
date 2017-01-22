@@ -8,4 +8,14 @@
     <string name="x_coordinate">X Coordinate</string>
     <string name="y_coordinate">Y Coordinate</string>
     <string name="ms">ms</string>
+    <string name="fps">FPS:</string>
+    <string name="edit_hsv_values">Edit HSV Values</string>
+    <string name="hsv_view_mode">HSV View Mode</string>
+
+    <string name="threshold_h_min_key">threshold_h_min_key</string>
+    <string name="threshold_h_max_key">threshold_h_max_key</string>
+    <string name="threshold_s_min_key">threshold_s_min_key</string>
+    <string name="threshold_s_max_key">threshold_s_max_key</string>
+    <string name="threshold_v_min_key">threshold_v_min_key</string>
+    <string name="threshold_v_max_key">threshold_v_max_key</string>
 </resources>

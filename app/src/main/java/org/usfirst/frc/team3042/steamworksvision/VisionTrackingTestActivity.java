@@ -12,8 +12,18 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.florescu.android.rangeseekbar.RangeSeekBar;
 import org.opencv.android.OpenCVLoader;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
@@ -26,11 +36,15 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
     TextView isConnected;
     RobotConnectionStatusBroadcastReceiver connectionReceiver;
     private VisionGLSurfaceView view;
+    private Preferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vision_tracking);
+
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         if (!OpenCVLoader.initDebug()) {
             Log.e(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), not working.");
@@ -38,44 +52,12 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
             Log.d(this.getClass().getSimpleName(), "  OpenCVLoader.initDebug(), working.");
         }
 
+        prefs = new Preferences(this);
+
         tryStartCamera();
-        /*
-        isConnected = (TextView)findViewById(R.id.isConnected);
 
-        connectionReceiver = new RobotConnectionStatusBroadcastReceiver(AppContext.getDefaultContext(), new ConnectionTracker());
+        isConnected = (TextView)findViewById(R.id.connected);
 
-        final EditText xPos = (EditText)findViewById(R.id.xPos);
-        final EditText yPos = (EditText)findViewById(R.id.yPos);
-        final EditText timestamp = (EditText)findViewById(R.id.timestamp);
-
-        // Setting up button to send data from fields as a test message
-        final Button messageButton = (Button) findViewById(R.id.sendMessage);
-        messageButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                int x = (isInteger(xPos.getText().toString()))? Integer.parseInt(xPos.getText().toString()) : 0;
-                int y = (isInteger(yPos.getText().toString()))? Integer.parseInt(yPos.getText().toString()) : 0;
-                int time = (isInteger(timestamp.getText().toString()))? Integer.parseInt(timestamp.getText().toString()) : 0;
-
-                TargetInfo testTarget = new TargetInfo(x, y, 0);
-                VisionUpdate testUpdate = new VisionUpdate(System.nanoTime());
-                testUpdate.addCameraTargetInfo(testTarget);
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                TargetUpdateMessage testMessage = new TargetUpdateMessage(testUpdate, System.nanoTime());
-                AppContext.getRobotConnection().send(testMessage);
-            }
-        });
-
-        this.runOnUiThread(new Runnable() {
-            public void run() {
-                Toast.makeText(AppContext.getDefaultContext(), "Could not connect", Toast.LENGTH_SHORT);
-            }
-        });
-        */
     }
 
     /**
@@ -129,17 +111,107 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
 
         view = (VisionGLSurfaceView) findViewById(R.id.my_gl_surface_view);
         view.setCameraTextureListener(view);
-        //view.setPreferences(prefs);
+        view.setPreferences(prefs);
+        TextView tv = (TextView) findViewById(R.id.fps_text_view);
+    }
+
+    public void onHSVCheckboxClicked(View view) {
+        boolean checked = ((CheckBox) view).isChecked();
+
+        this.view.setOutputHSVFrame(checked);
+    }
+
+    public void openBottomSheet(View v) {
+        View view = getLayoutInflater().inflate(R.layout.hsv_bottom_sheet, null);
+        LinearLayout container = (LinearLayout) view.findViewById(R.id.popup_window);
+        container.getBackground().setAlpha(20);
+
+
+        final Dialog mBottomSheetDialog = new Dialog(VisionTrackingTestActivity.this, R.style.MaterialDialogSheet);
+        mBottomSheetDialog.setContentView(view);
+        mBottomSheetDialog.setCancelable(true);
+        mBottomSheetDialog.getWindow().setLayout(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        mBottomSheetDialog.getWindow().setGravity(Gravity.BOTTOM);
+        mBottomSheetDialog.show();
+
+        final RangeSeekBar hSeekBar = (RangeSeekBar) view.findViewById(R.id.hSeekBar);
+        setSeekBar(hSeekBar, getHRange());
+        hSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener<Integer>() {
+            @Override
+            public void onRangeSeekBarValuesChanged(RangeSeekBar<?> rangeSeekBar, Integer min, Integer max) {
+                Log.i("H", min + " " + max);
+                prefs.setThresholdHRange(min, max);
+            }
+        });
+
+        final RangeSeekBar sSeekBar = (RangeSeekBar) view.findViewById(R.id.sSeekBar);
+        setSeekBar(sSeekBar, getSRange());
+        sSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener<Integer>() {
+            @Override
+            public void onRangeSeekBarValuesChanged(RangeSeekBar<?> rangeSeekBar, Integer min, Integer max) {
+                Log.i("S", min + " " + max);
+                prefs.setThresholdSRange(min, max);
+            }
+        });
+
+        final RangeSeekBar vSeekBar = (RangeSeekBar) view.findViewById(R.id.vSeekBar);
+        setSeekBar(vSeekBar, getVRange());
+        vSeekBar.setOnRangeSeekBarChangeListener(new RangeSeekBar.OnRangeSeekBarChangeListener<Integer>() {
+            @Override
+            public void onRangeSeekBarValuesChanged(RangeSeekBar<?> rangeSeekBar, Integer min, Integer max) {
+                Log.i("V", min + " " + max);
+                prefs.setThresholdVRange(min, max);
+            }
+        });
+
+        Button restoreButton = (Button) view.findViewById(R.id.restoreDefaultsButton);
+        restoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                prefs.restoreDefaults();
+                setSeekBar(hSeekBar, getHRange());
+                setSeekBar(sSeekBar, getSRange());
+                setSeekBar(vSeekBar, getVRange());
+            }
+        });
+    }
+
+    private static void setSeekBar(RangeSeekBar<Integer> bar, Pair<Integer, Integer> values) {
+        bar.setSelectedMinValue(values.first);
+        bar.setSelectedMaxValue(values.second);
+    }
+
+    public Pair<Integer, Integer> getHRange() {
+        return prefs.getThresholdHRange();
+    }
+
+    public Pair<Integer, Integer> getSRange() {
+        return prefs.getThresholdSRange();
+    }
+
+    public Pair<Integer, Integer> getVRange() {
+        return prefs.getThresholdVRange();
     }
 
     @Override
     public void robotConnected() {
+        isConnected.setText("Connected");
+
         view.setRobotConnection(AppContext.getRobotConnection());
     }
 
     @Override
     public void robotDisconnected() {
+        isConnected.setText("Not Connected");
+
         view.setRobotConnection(null);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options_menu, menu);
+        return true;
     }
 
     public static boolean isInteger(String s) {
