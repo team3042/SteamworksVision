@@ -23,7 +23,8 @@
             android:text="H"
             android:id="@+id/hLabel"
             android:paddingRight="10dp"
-            android:paddingTop="23dp" />
+            android:paddingTop="23dp"
+            android:textColor="@android:color/background_light" />
 
         <org.florescu.android.rangeseekbar.RangeSeekBar
             android:layout_width="match_parent"
@@ -49,7 +50,8 @@
             android:text="S"
             android:id="@+id/sLabel"
             android:paddingRight="10dp"
-            android:paddingTop="23dp" />
+            android:paddingTop="23dp"
+            android:textColor="@android:color/background_light" />
 
         <org.florescu.android.rangeseekbar.RangeSeekBar
             android:layout_width="match_parent"
@@ -75,7 +77,8 @@
             android:text="V"
             android:id="@+id/vLabel"
             android:paddingRight="10dp"
-            android:paddingTop="23dp" />
+            android:paddingTop="23dp"
+            android:textColor="@android:color/background_light" />
 
         <org.florescu.android.rangeseekbar.RangeSeekBar
             android:layout_width="match_parent"

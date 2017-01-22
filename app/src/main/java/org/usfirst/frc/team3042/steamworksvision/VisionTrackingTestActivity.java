@@ -16,10 +16,10 @@ import android.util.Pair;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -115,13 +115,16 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
         TextView tv = (TextView) findViewById(R.id.fps_text_view);
     }
 
-    public void onHSVCheckboxClicked(View view) {
-        boolean checked = ((CheckBox) view).isChecked();
+    public boolean onHSVCheckboxClicked(MenuItem item) {
+        boolean checked = item.isChecked();
+        item.setChecked(!checked);
 
-        this.view.setOutputHSVFrame(checked);
+        view.setOutputHSVFrame(!checked);
+
+        return true;
     }
 
-    public void openBottomSheet(View v) {
+    public boolean openBottomSheet(MenuItem item) {
         View view = getLayoutInflater().inflate(R.layout.hsv_bottom_sheet, null);
         LinearLayout container = (LinearLayout) view.findViewById(R.id.popup_window);
         container.getBackground().setAlpha(20);
@@ -174,6 +177,8 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
                 setSeekBar(vSeekBar, getVRange());
             }
         });
+
+        return true;
     }
 
     private static void setSeekBar(RangeSeekBar<Integer> bar, Pair<Integer, Integer> values) {
