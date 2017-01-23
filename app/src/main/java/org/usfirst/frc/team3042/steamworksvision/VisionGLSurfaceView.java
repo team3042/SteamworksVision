@@ -1,10 +1,14 @@
 package org.usfirst.frc.team3042.steamworksvision;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.camera2.CaptureRequest;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.TextView;
 
 import org.opencv.android.BetterCamera2Renderer;
 import org.opencv.android.BetterCameraGLSurfaceView;
@@ -28,6 +32,7 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
 
     protected int frameCounter;
     protected long lastNanoTime;
+    TextView fpsText = null;
     private RobotConnection robotConnection;
     private Preferences prefs;
     protected boolean outputHSVFrame = false;
@@ -72,6 +77,17 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
         if (frameCounter >= 30) {
             final int fps = (int) (frameCounter * 1e9 / (System.nanoTime() - lastNanoTime));
             Log.i(LOGTAG, "drawFrame() FPS: " + fps);
+            if (fpsText != null) {
+                Runnable fpsUpdater = new Runnable() {
+                    public void run() {
+                        fpsText.setText("FPS: " + fps);
+                    }
+                };
+                new Handler(Looper.getMainLooper()).post(fpsUpdater);
+            } else {
+                Log.d(LOGTAG, "mFpsText == null");
+                fpsText = (TextView) ((Activity) getContext()).findViewById(R.id.fps_text_view);
+            }
             frameCounter = 0;
             lastNanoTime = System.nanoTime();
         }
