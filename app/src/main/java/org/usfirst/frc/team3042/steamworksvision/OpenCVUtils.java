@@ -85,7 +85,7 @@ public class OpenCVUtils {
         ByteBuffer outBuffer;
 
         if(outputHSVFrame) {
-            Imgproc.cvtColor(filteredFrame, filteredFrame, Imgproc.COLOR_BGR2BGRA);
+            Imgproc.cvtColor(filteredFrame, filteredFrame, Imgproc.COLOR_GRAY2BGRA);
 
             byte[] output = new byte[filteredFrame.rows() * filteredFrame.cols() * filteredFrame.channels()];
             filteredFrame.get(0, 0, output);
