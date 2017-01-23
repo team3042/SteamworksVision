@@ -20,7 +20,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="H"
+            android:text="@string/h"
             android:id="@+id/hLabel"
             android:paddingRight="10dp"
             android:paddingTop="23dp"
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="S"
+            android:text="@string/s"
             android:id="@+id/sLabel"
             android:paddingRight="10dp"
             android:paddingTop="23dp"
@@ -74,7 +74,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="V"
+            android:text="@string/v"
             android:id="@+id/vLabel"
             android:paddingRight="10dp"
             android:paddingTop="23dp"
@@ -94,7 +94,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Restore Defaults"
+        android:text="@string/restore_defaults"
         android:id="@+id/restoreDefaultsButton"
         android:layout_gravity="center_horizontal" />
 

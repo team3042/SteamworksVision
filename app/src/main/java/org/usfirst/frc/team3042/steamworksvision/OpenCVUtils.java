@@ -81,16 +81,18 @@ public class OpenCVUtils {
 
         outputOverlayImage(contoursFrame, targetConvexHullLeft, targetConvexHullRight);
 
-        Imgproc.cvtColor(contoursFrame, contoursFrame, Imgproc.COLOR_BGR2BGRA);
-
         // Outputting Mat to the screen
         ByteBuffer outBuffer;
 
         if(outputHSVFrame) {
-            byte[] output = new byte[dilatedFrame.rows() * dilatedFrame.cols() * dilatedFrame.channels()];
-            dilatedFrame.get(0, 0, output);
+            Imgproc.cvtColor(filteredFrame, filteredFrame, Imgproc.COLOR_BGR2BGRA);
+
+            byte[] output = new byte[filteredFrame.rows() * filteredFrame.cols() * filteredFrame.channels()];
+            filteredFrame.get(0, 0, output);
             outBuffer = ByteBuffer.wrap(output);
         } else {
+            Imgproc.cvtColor(contoursFrame, contoursFrame, Imgproc.COLOR_BGR2BGRA);
+
             Core.bitwise_or(contoursFrame, input, input);
             byte[] output = new byte[input.rows() * input.cols() * input.channels()];
             input.get(0, 0, output);

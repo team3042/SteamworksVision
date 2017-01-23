@@ -37,6 +37,7 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
     RobotConnectionStatusBroadcastReceiver connectionReceiver;
     private VisionGLSurfaceView view;
     private Preferences prefs;
+    private RobotConnectionStatusBroadcastReceiver receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,7 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
         }
 
         prefs = new Preferences(this);
+        receiver = new RobotConnectionStatusBroadcastReceiver(this, this);
 
         tryStartCamera();
 

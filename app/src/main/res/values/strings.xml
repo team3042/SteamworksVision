@@ -18,4 +18,8 @@
     <string name="threshold_s_max_key">threshold_s_max_key</string>
     <string name="threshold_v_min_key">threshold_v_min_key</string>
     <string name="threshold_v_max_key">threshold_v_max_key</string>
+    <string name="h">H</string>
+    <string name="restore_defaults">Restore Defaults</string>
+    <string name="s">S</string>
+    <string name="v">V</string>
 </resources>

@@ -19,7 +19,7 @@ import java.util.HashMap;
 
 public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements BetterCameraGLSurfaceView.CameraTextureListener {
 
-    static final String LOGTAG = "VTGLSurfaceView";
+    static final String LOGTAG = "VGLSurfaceView";
 
     static final int kHeight = 480;
     static final int kWidth = 640;
