@@ -41,7 +41,7 @@ public class OpenCVUtils {
     private static Point[] targetConvexHullLeft, targetConvexHullRight;
     private static MatOfPoint[] target;
 
-    private static double x, y, distance;
+    private static double x, y, centerTopY, centerBottomY;
 
     public static ArrayList<TargetInfo> processImage(int texIn, int texOut, int width, int height, int lowerH, int upperH,
                                               int lowerS, int upperS, int lowerV, int upperV, boolean outputHSVFrame) {
@@ -103,7 +103,7 @@ public class OpenCVUtils {
         GLES20.glBindTexture(GL_TEXTURE_2D, texOut);
         GLES20.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, outBuffer);
 
-        targets.add(new TargetInfo(x, y ,distance));
+        targets.add(new TargetInfo(x, y, centerTopY, centerBottomY));
 
         return targets;
     }
@@ -131,9 +131,11 @@ public class OpenCVUtils {
         Imgproc.line(contoursFrame,  new Point(centerX + crosshairSize / 2, centerY), new Point(centerX - crosshairSize / 2, centerY), new Scalar(255, 255, 255), 2);
         Imgproc.line(contoursFrame,  new Point(centerX, centerY + crosshairSize / 2), new Point(centerX, centerY - crosshairSize / 2), new Scalar(255, 255, 255), 2);
 
+        centerTopY = (targetConvexHullLeft[0].y + targetConvexHullLeft[1].y + targetConvexHullRight[0].y + targetConvexHullRight[1].y) / 4;
+        centerBottomY = (targetConvexHullLeft[2].y + targetConvexHullLeft[3].y + targetConvexHullRight[2].y + targetConvexHullRight[3].y) / 4;
+
         x = centerX;
         y = centerY;
-        distance = 5;
     }
 
     private static Mat filterImageHSV(Mat image, Scalar lowerHSVBound, Scalar upperHSVBound) {

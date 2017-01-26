@@ -107,8 +107,11 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
             double x = Math.atan((currentTarget.getX() - kCenterCol) / getFocalLengthPixels());
             double y = Math.atan((currentTarget.getY() - kCenterRow) / getFocalLengthPixels());
 
-            visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, currentTarget.getDistance()));
-            Log.i(LOGTAG, "Target at: " + x + ", " + y);
+            double centerTopY = Math.atan((currentTarget.getCenterTopY() - kCenterRow) / getFocalLengthPixels());
+            double centerBottomY = Math.atan((currentTarget.getCenterBottomY() - kCenterRow) / getFocalLengthPixels());
+
+            visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, Math.abs(centerBottomY - centerTopY)));
+            Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + Math.abs(centerBottomY - centerTopY));
         }
 
         if (robotConnection != null) {
