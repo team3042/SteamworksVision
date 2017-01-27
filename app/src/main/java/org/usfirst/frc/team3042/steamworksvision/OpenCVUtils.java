@@ -25,8 +25,8 @@ import static org.opencv.core.CvType.CV_8UC4;
 
 public class OpenCVUtils {
 
-    private static final double MIN_AREA = 300;
-    private static final double MIN_STENCIL_SIMILARITY = 0.2;
+    private static final double MIN_AREA = 200;
+    private static final double MIN_STENCIL_SIMILARITY = 5;
 
     private static Mat stencil;
     private static Mat contoursFrame;
@@ -40,6 +40,8 @@ public class OpenCVUtils {
     private static List<MatOfPoint> contours;
     private static Point[] targetConvexHullLeft, targetConvexHullRight;
     private static MatOfPoint[] target;
+
+    private static boolean targetFound = false;
 
     private static double x, y, centerTopY, centerBottomY;
 
@@ -99,13 +101,31 @@ public class OpenCVUtils {
             outBuffer = ByteBuffer.wrap(output);
         }
 
+        releaseMats();
+
         GLES20.glActiveTexture(GL_TEXTURE0);
         GLES20.glBindTexture(GL_TEXTURE_2D, texOut);
         GLES20.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, outBuffer);
 
-        targets.add(new TargetInfo(x, y, centerTopY, centerBottomY));
+        if(targetFound) {
+            targets.add(new TargetInfo(x, y, centerTopY, centerBottomY));
+        }
 
         return targets;
+    }
+
+    // Releases all Mats to keep memory clear
+    private static void releaseMats() {
+        filteredFrame.release();
+        erodedFrame.release();
+        dilatedFrame.release();
+
+        target[0].release();
+        target[1].release();
+
+        for(int i = 0; i < contours.size(); i++) {
+            contours.get(i).release();
+        }
     }
 
     //Outputting an image with overlaid contours and convex hull on target
@@ -222,9 +242,13 @@ public class OpenCVUtils {
 
         MatOfPoint[] targetContour = {new MatOfPoint(), new MatOfPoint()};
         if(mostSimilarGoals[left] == -1 || mostSimilarGoals[right] == -1) {
+            targetFound = false;
+
             System.out.println("No similar contours found");
         }
         else {
+            targetFound = true;
+
             targetContour[0] = contours.get(mostSimilarGoals[left]);
             targetContour[1] = contours.get(mostSimilarGoals[right]);
         }
