@@ -198,9 +198,9 @@ public class OpenCVUtils {
         for(int i = 0; i < contours.size(); i++) {
             MatOfPoint currentContour = contours.get(i);
 
-            //Filtering out small contours
+            // Filtering out small contours
             if(Imgproc.contourArea(currentContour) > MIN_AREA) {
-                //Calculating similarity to the u shape of the goal
+                // Calculating similarity to the u shape of the goal
                 double similarity = Imgproc.matchShapes(currentContour, stencil, Imgproc.CV_CONTOURS_MATCH_I3, 0);
                 System.out.println(similarity);
                 if(similarity < MIN_STENCIL_SIMILARITY) {
@@ -213,8 +213,8 @@ public class OpenCVUtils {
             }
         }
 
-        //Finding 2 most similar of the contours, lower similarity is better
-        //2 targets found as there are 2 targets
+        // Finding 2 most similar of the contours, lower similarity is better
+        // 2 targets found as there are 2 targets
         int mostSimilarGoals[] = {-1, -1};
         for(int i = 0; i < similarities.length; i++) {
             if(similarities[i] != 1000) {
@@ -230,7 +230,7 @@ public class OpenCVUtils {
             }
         }
 
-        //Find leftmost of 2 goals
+        // Find leftmost of 2 goals
         int left = 0, right = 0;
         if(mostSimilarGoals[1] != -1) {
             Point[][] convexHulls = {calculateConvexHull(contours.get(mostSimilarGoals[0])),
@@ -256,7 +256,7 @@ public class OpenCVUtils {
         return targetContour;
     }
 
-    //Calculating the convex hull of a roughly rectangular contour
+    // Calculating the convex hull of a roughly rectangular contour
     private static Point[] calculateConvexHull(MatOfPoint contour) {
         Point[] targetPoints = contour.toArray();
         Point[] convexHull = new Point[4];
@@ -265,7 +265,7 @@ public class OpenCVUtils {
         convexHull[2] = new Point(0, 0);
         convexHull[3] = new Point(10000, 0);
 
-        //Iterating through all points in the contour to find farthest in each direction
+        // Iterating through all points in the contour to find farthest in each direction
         for(int i = 0; i < targetPoints.length; i++) {
             Point currentPoint = targetPoints[i];
             if (convexHull[0].x + convexHull[0].y > currentPoint.x + currentPoint.y) convexHull[0] = currentPoint;

@@ -110,7 +110,8 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
             double centerTopY = Math.atan((currentTarget.getCenterTopY() - kCenterRow) / getFocalLengthPixels());
             double centerBottomY = Math.atan((currentTarget.getCenterBottomY() - kCenterRow) / getFocalLengthPixels());
 
-            double distance = 0.432 * Math.pow(Math.abs(centerBottomY - centerTopY), -0.95);
+            // Distance calculation in inches determined by fitting curve to experimental data
+            double distance = 12 * (0.432 * Math.pow(Math.abs(centerBottomY - centerTopY), -0.95));
 
             visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, distance));
             Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + distance);
