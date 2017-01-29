@@ -6,8 +6,11 @@ import android.opengl.GLES20;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
+import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
@@ -45,6 +48,18 @@ public class OpenCVUtils {
 
     private static double x, y, centerTopY, centerBottomY;
 
+    private static double filterContoursMinArea = 300.0;
+    private static double filterContoursMinPerimeter = 0;
+    private static double filterContoursMinWidth = 0;
+    private static double filterContoursMaxWidth = 1000;
+    private static double filterContoursMinHeight = 0;
+    private static double filterContoursMaxHeight = 1000;
+    private static double[] filterContoursSolidity = {90.0, 100.0};
+    private static double filterContoursMaxVertices = 1000.0;
+    private static double filterContoursMinVertices = 4.0;
+    private static double filterContoursMinRatio = 0.3;
+    private static double filterContoursMaxRatio = 0.6;
+
     public static ArrayList<TargetInfo> processImage(int texIn, int texOut, int width, int height, int lowerH, int upperH,
                                               int lowerS, int upperS, int lowerV, int upperV, boolean outputHSVFrame) {
         ArrayList<TargetInfo> targets = new ArrayList<>();
@@ -70,6 +85,11 @@ public class OpenCVUtils {
         dilatedFrame = dilateImage(erodedFrame);
 
         contours = getContours(dilatedFrame);
+
+        contours = filterContours(contours, filterContoursMinArea, filterContoursMinPerimeter,
+                filterContoursMinWidth, filterContoursMaxWidth, filterContoursMinHeight,
+                filterContoursMaxHeight, filterContoursSolidity, filterContoursMaxVertices,
+                filterContoursMinVertices, filterContoursMinRatio, filterContoursMaxRatio);
 
         contoursFrame = dilatedFrame;
         Imgproc.cvtColor(contoursFrame, contoursFrame, Imgproc.COLOR_GRAY2BGR);
@@ -191,6 +211,56 @@ public class OpenCVUtils {
         Imgproc.findContours(image, contours, new Mat(), Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
 
         return contours;
+    }
+
+    /**
+     * Filters out contours that do not meet certain criteria.
+     * @param inputContours is the input list of contours
+     * @param minArea is the minimum area of a contour that will be kept
+     * @param minPerimeter is the minimum perimeter of a contour that will be kept
+     * @param minWidth minimum width of a contour
+     * @param maxWidth maximum width
+     * @param minHeight minimum height
+     * @param maxHeight maximimum height
+     * @param solidity the minimum and maximum solidity of a contour
+     * @param minVertexCount minimum vertex Count of the contours
+     * @param maxVertexCount maximum vertex Count
+     * @param minRatio minimum ratio of width to height
+     * @param maxRatio maximum ratio of width to height
+     */
+    private static List<MatOfPoint> filterContours(List<MatOfPoint> inputContours, double minArea,
+                                double minPerimeter, double minWidth, double maxWidth, double minHeight, double
+                                        maxHeight, double[] solidity, double maxVertexCount, double minVertexCount, double
+                                        minRatio, double maxRatio) {
+        final MatOfInt hull = new MatOfInt();
+        List<MatOfPoint> output = new ArrayList<>();
+        output.clear();
+        //operation
+        for (int i = 0; i < inputContours.size(); i++) {
+            final MatOfPoint contour = inputContours.get(i);
+            final Rect bb = Imgproc.boundingRect(contour);
+            if (bb.width < minWidth || bb.width > maxWidth) continue;
+            if (bb.height < minHeight || bb.height > maxHeight) continue;
+            final double area = Imgproc.contourArea(contour);
+            if (area < minArea) continue;
+            if (Imgproc.arcLength(new MatOfPoint2f(contour.toArray()), true) < minPerimeter) continue;
+            Imgproc.convexHull(contour, hull);
+            MatOfPoint mopHull = new MatOfPoint();
+            mopHull.create((int) hull.size().height, 1, CvType.CV_32SC2);
+            for (int j = 0; j < hull.size().height; j++) {
+                int index = (int)hull.get(j, 0)[0];
+                double[] point = new double[] { contour.get(index, 0)[0], contour.get(index, 0)[1]};
+                mopHull.put(j, 0, point);
+            }
+            final double solid = 100 * area / Imgproc.contourArea(mopHull);
+            if (solid < solidity[0] || solid > solidity[1]) continue;
+            if (contour.rows() < minVertexCount || contour.rows() > maxVertexCount)	continue;
+            final double ratio = bb.width / (double)bb.height;
+            if (ratio < minRatio || ratio > maxRatio) continue;
+            output.add(contour);
+        }
+
+        return output;
     }
 
     private static MatOfPoint[] processContours(List<MatOfPoint> contours) {
