@@ -40,9 +40,14 @@ public class OpenCVUtils {
     private static Mat filteredFrame;
     private static Mat erodedFrame;
     private static Mat dilatedFrame;
+    private static Mat boilerDilatedFrame;
     private static List<MatOfPoint> contours;
     private static Point[] targetConvexHullLeft, targetConvexHullRight;
+    private static Point[] boilerUpperHull;
+    private static Point[] boilerLowerHull;
     private static MatOfPoint[] target;
+    private static MatOfPoint boilerTargetUpper;
+    private static MatOfPoint boilerTargetLower;
 
     private static boolean targetFound = false;
 
@@ -134,14 +139,104 @@ public class OpenCVUtils {
         return targets;
     }
 
+    //Getting boiler data
+    public static ArrayList<TargetInfo> processBoilerImage(int texIn, int texOut, int width, int height, int lowerH, int upperH,
+                                                     int lowerS, int upperS, int lowerV, int upperV, boolean outputHSVFrame) {
+        ArrayList<TargetInfo> targets = new ArrayList<>();
+
+        // Creating HSV bounds from individual components
+        lowerHSVBound = new Scalar(lowerH, lowerS, lowerV, 0);
+        upperHSVBound = new Scalar(upperH, upperS, upperV, 0);
+
+        // Getting image from glFrame into OpenCV
+        Mat input = new Mat(height, width, CV_8UC4);
+
+        ByteBuffer buffer = ByteBuffer.allocate(input.rows() * input.cols() * input.channels());
+        GLES20.glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+        input.put(0, 0, buffer.array());
+
+        // Processing image
+        filteredFrame = filterImageHSV(input, lowerHSVBound, upperHSVBound);
+
+        erodedFrame = erodeImage(filteredFrame);
+
+        dilatedFrame = dilateImage(erodedFrame);
+        boilerDilatedFrame = dilatedFrame.clone();
+
+        contours = getContours(dilatedFrame);
+
+        contoursFrame = dilatedFrame;
+        Imgproc.cvtColor(contoursFrame, contoursFrame, Imgproc.COLOR_GRAY2BGR);
+
+        Imgproc.drawContours(contoursFrame, contours, -1, new Scalar(255, 255, 0), 1);
+
+        boilerTargetUpper = processContoursBoiler(contours);
+
+        boilerUpperHull = calculateConvexHull(boilerTargetUpper);
+
+        Mat croppedImage = boilerCropImage(boilerUpperHull, boilerDilatedFrame);
+
+        List<MatOfPoint> croppedContours = getContours(croppedImage);
+
+        boilerTargetLower = processContoursBoiler(croppedContours);
+
+        boilerLowerHull = calculateConvexHull(boilerTargetLower);
+
+        for(int i = 0; i<boilerLowerHull.length; i++){
+            boilerLowerHull[i].x+=cropX;
+            boilerLowerHull[i].y+=cropY;
+        }
+
+        Point targetCenter = getConvexHullCenter(boilerUpperHull);
+        Point targetCenter2 = getConvexHullCenter(boilerLowerHull);
+
+        int pixelDistance = (int) (targetCenter2.y-targetCenter.y);
+
+        outputOverlayImage(contoursFrame, boilerUpperHull, boilerLowerHull);
+
+        // Outputting Mat to the screen
+        ByteBuffer outBuffer;
+
+        if(outputHSVFrame) {
+            Imgproc.cvtColor(filteredFrame, filteredFrame, Imgproc.COLOR_GRAY2BGRA);
+
+            byte[] output = new byte[filteredFrame.rows() * filteredFrame.cols() * filteredFrame.channels()];
+            filteredFrame.get(0, 0, output);
+            outBuffer = ByteBuffer.wrap(output);
+        } else {
+            Imgproc.cvtColor(contoursFrame, contoursFrame, Imgproc.COLOR_BGR2BGRA);
+
+            Core.bitwise_or(contoursFrame, input, input);
+            byte[] output = new byte[input.rows() * input.cols() * input.channels()];
+            input.get(0, 0, output);
+            outBuffer = ByteBuffer.wrap(output);
+        }
+
+        releaseMats();
+
+        GLES20.glActiveTexture(GL_TEXTURE0);
+        GLES20.glBindTexture(GL_TEXTURE_2D, texOut);
+        GLES20.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, outBuffer);
+
+        if(targetFound) {
+            targets.add(new TargetInfo(x, y, centerTopY, centerBottomY));
+        }
+
+        return targets;
+    }
+
     // Releases all Mats to keep memory clear
     private static void releaseMats() {
         filteredFrame.release();
         erodedFrame.release();
         dilatedFrame.release();
+        boilerDilatedFrame.release();
 
         target[0].release();
         target[1].release();
+
+        boilerTargetUpper.release();
+        boilerTargetLower.release();
 
         for(int i = 0; i < contours.size(); i++) {
             contours.get(i).release();
@@ -265,20 +360,18 @@ public class OpenCVUtils {
 
     private static MatOfPoint[] processContours(List<MatOfPoint> contours) {
         double[] similarities = new double[contours.size()];
-        for(int i = 0; i < contours.size(); i++) {
+        for (int i = 0; i < contours.size(); i++) {
             MatOfPoint currentContour = contours.get(i);
 
             // Filtering out small contours
-            if(Imgproc.contourArea(currentContour) > MIN_AREA) {
+            if (Imgproc.contourArea(currentContour) > MIN_AREA) {
                 // Calculating similarity to the u shape of the goal
                 double similarity = Imgproc.matchShapes(currentContour, stencil, Imgproc.CV_CONTOURS_MATCH_I3, 0);
                 System.out.println(similarity);
-                if(similarity < MIN_STENCIL_SIMILARITY) {
+                if (similarity < MIN_STENCIL_SIMILARITY) {
                     similarities[i] = similarity;
-                }
-                else similarities[i] = 1000;
-            }
-            else {
+                } else similarities[i] = 1000;
+            } else {
                 similarities[i] = 1000;
             }
         }
@@ -286,14 +379,13 @@ public class OpenCVUtils {
         // Finding 2 most similar of the contours, lower similarity is better
         // 2 targets found as there are 2 targets
         int mostSimilarGoals[] = {-1, -1};
-        for(int i = 0; i < similarities.length; i++) {
-            if(similarities[i] != 1000) {
-                if(similarities[i] < ((mostSimilarGoals[1] == -1)? 1000: similarities[mostSimilarGoals[1]])) {
-                    if(similarities[i] < ((mostSimilarGoals[0] == -1)? 1000: similarities[mostSimilarGoals[0]])) {
+        for (int i = 0; i < similarities.length; i++) {
+            if (similarities[i] != 1000) {
+                if (similarities[i] < ((mostSimilarGoals[1] == -1) ? 1000 : similarities[mostSimilarGoals[1]])) {
+                    if (similarities[i] < ((mostSimilarGoals[0] == -1) ? 1000 : similarities[mostSimilarGoals[0]])) {
                         mostSimilarGoals[1] = mostSimilarGoals[0];
                         mostSimilarGoals[0] = i;
-                    }
-                    else {
+                    } else {
                         mostSimilarGoals[1] = i;
                     }
                 }
@@ -302,21 +394,20 @@ public class OpenCVUtils {
 
         // Find leftmost of 2 goals
         int left = 0, right = 0;
-        if(mostSimilarGoals[1] != -1) {
+        if (mostSimilarGoals[1] != -1) {
             Point[][] convexHulls = {calculateConvexHull(contours.get(mostSimilarGoals[0])),
                     calculateConvexHull(contours.get(mostSimilarGoals[1]))};
 
-            left = (convexHulls[0][2].x < convexHulls[1][2].x)? 0 : 1;
-            right = (left == 0)? 1 : 0;
+            left = (convexHulls[0][2].x < convexHulls[1][2].x) ? 0 : 1;
+            right = (left == 0) ? 1 : 0;
         }
 
         MatOfPoint[] targetContour = {new MatOfPoint(), new MatOfPoint()};
-        if(mostSimilarGoals[left] == -1 || mostSimilarGoals[right] == -1) {
+        if (mostSimilarGoals[left] == -1 || mostSimilarGoals[right] == -1) {
             targetFound = false;
 
             System.out.println("No similar contours found");
-        }
-        else {
+        } else {
             targetFound = true;
 
             targetContour[0] = contours.get(mostSimilarGoals[left]);
@@ -345,5 +436,111 @@ public class OpenCVUtils {
         }
 
         return convexHull;
+    }
+
+    //Methods for boiler target acquisition
+    private static Mat boilerStencil;
+    private static MatOfPoint processContoursBoiler(List<MatOfPoint> contours) {
+        //Set up boiler stencil
+        boilerStencil = new Mat(8, 1, CvType.CV_32SC2);
+        boilerStencil.put(0, 0, new int[]{/*p1*/0, 19, /*p2*/ 6, 5, /*p3*/ 20, 0, /*p4*/ 46, 0,
+                /*p5*/ 58, 5, /*p6*/ 64, 19, /*p7*/ 46, 16, /*p8*/ 20, 16, /*p9 0, 20*/});
+
+        double[] similarities = new double[contours.size()];
+        for(int i = 0; i < contours.size(); i++) {
+            MatOfPoint currentContour = contours.get(i);
+
+            //Filtering out small contours
+            if(Imgproc.contourArea(currentContour) > 60) {
+                //Calculating similarity to the u shape of the goal
+                double similarity = Imgproc.matchShapes(currentContour, boilerStencil, Imgproc.CV_CONTOURS_MATCH_I3, 0);
+                //System.out.println(similarity);
+                if(similarity < 20) {
+                    similarities[i] = similarity;
+                }
+                else similarities[i] = 1000;
+            }
+            else {
+                similarities[i] = 1000;
+            }
+        }
+
+        //Finding 2 most similar of the contours, lower similarity is better
+        //2 targets found as up to two goals could be in vision
+        int mostSimilarGoal = -1;
+        for(int i = 0; i < similarities.length; i++) {
+            if(similarities[i] != 1000) {
+                if(similarities[i] < ((mostSimilarGoal == -1)? 1000: similarities[mostSimilarGoal])) {
+                    mostSimilarGoal = i;
+                }
+            }
+        }
+
+        MatOfPoint targetContour;
+        if(mostSimilarGoal == -1) {
+            System.out.println("No similar contour found");
+            targetContour = new MatOfPoint();
+        }
+        else {
+            targetContour = contours.get(mostSimilarGoal);
+        }
+
+        return targetContour;
+    }
+
+    private static int croppingError = 8;
+    private static int cropX = 0;
+    private static int cropY = 0;
+    private static Mat boilerCropImage(Point[] convexHull, Mat image){
+        double lowestY = 0;
+        double leftX = image.width(), rightX = 0;
+
+        for(int i = 0; i < convexHull.length; i++){
+            if(lowestY < convexHull[i].y){
+                lowestY = convexHull[i].y;
+            }
+            if(leftX > convexHull[i].x){
+                leftX = convexHull[i].x;
+            }
+            if(rightX < convexHull[i].x){
+                rightX = convexHull[i].x;
+            }
+        }
+
+        //Add in error for the cropping
+        leftX -= croppingError;
+        rightX += croppingError;
+
+        //Calculate values for rectangle
+        int x = (int)leftX;
+        int y = (int)lowestY;
+        int width = (int)rightX - x;
+        int height = image.height() - y;
+
+        Rect cropROI = new Rect( x, y, width, height);
+
+        Mat cropped = new Mat(image, cropROI);
+
+        cropX = x;
+        cropY = y;
+
+        return cropped;
+    }
+
+    private static Point getConvexHullCenter(Point[] convexHull){
+        int avgX = 0;
+        int avgY = 0;
+
+        for(int i = 0; i< convexHull.length; i++){
+            avgX += convexHull[i].x;
+            avgY += convexHull[i].y;
+        }
+
+        avgX/=4;
+        avgY/=4;
+
+        Point center = new Point(avgX,avgY);
+
+        return center;
     }
 }
