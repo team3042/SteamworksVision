@@ -37,6 +37,9 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
     private Preferences prefs;
     protected boolean outputHSVFrame = false;
 
+    //Enum to control the vision mode
+    VisionMode visionMode = VisionMode.Boiler;
+
     static BetterCamera2Renderer.Settings getCameraSettings() {
         BetterCamera2Renderer.Settings settings = new BetterCamera2Renderer.Settings();
         settings.height = kHeight;
@@ -98,8 +101,18 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
         Pair<Integer, Integer> sRange = prefs != null ? prefs.getThresholdSRange() : blankPair();
         Pair<Integer, Integer> vRange = prefs != null ? prefs.getThresholdVRange() : blankPair();
 
-        ArrayList<TargetInfo> targets = OpenCVUtils.processImage(texIn, texOut, width, height, hRange.first, hRange.second,
-                sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
+        ArrayList<TargetInfo> targets = new ArrayList<TargetInfo>();
+
+        switch(visionMode){
+            case Boiler:
+                targets = OpenCVUtils.processBoilerImage(texIn, texOut, width, height, hRange.first, hRange.second,
+                        sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
+                break;
+            case Gear:
+                targets = OpenCVUtils.processImage(texIn, texOut, width, height, hRange.first, hRange.second,
+                        sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
+                break;
+        }
 
         for(int i = 0; i < targets.size(); i++) {
             TargetInfo currentTarget = targets.get(i);
@@ -136,4 +149,8 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
     private static Pair<Integer, Integer> blankPair() {
         return new Pair<Integer, Integer>(0, 255);
     }
+}
+
+enum VisionMode{
+    Gear, Boiler
 }
