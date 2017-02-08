@@ -488,6 +488,7 @@ public class OpenCVUtils {
         return targetContour;
     }
 
+    private static int croppingHeight = 70;
     private static int croppingError = 8;
     private static int cropX = 0;
     private static int cropY = 0;
@@ -515,7 +516,7 @@ public class OpenCVUtils {
         int x = (int)leftX;
         int y = (int)lowestY;
         int width = (int)rightX - x;
-        int height = image.height() - y;
+        int height = croppingHeight;
 
         Rect cropROI = new Rect( x, y, width, height);
 
