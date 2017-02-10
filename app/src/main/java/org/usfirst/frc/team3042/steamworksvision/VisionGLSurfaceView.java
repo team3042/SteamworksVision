@@ -38,7 +38,7 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
     protected boolean outputHSVFrame = false;
 
     //Enum to control the vision mode
-    VisionMode visionMode = VisionMode.Boiler;
+    public static VisionMode visionMode = VisionMode.Boiler;
 
     static BetterCamera2Renderer.Settings getCameraSettings() {
         BetterCamera2Renderer.Settings settings = new BetterCamera2Renderer.Settings();
@@ -108,7 +108,7 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
                 targets = OpenCVUtils.processBoilerImage(texIn, texOut, width, height, hRange.first, hRange.second,
                         sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
                 break;
-            case Gear:
+            case Lift:
                 targets = OpenCVUtils.processImage(texIn, texOut, width, height, hRange.first, hRange.second,
                         sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
                 break;
@@ -151,6 +151,3 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
     }
 }
 
-enum VisionMode{
-    Gear, Boiler
-}

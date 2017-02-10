@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import org.usfirst.frc.team3042.steamworksvision.VisionGLSurfaceView;
+import org.usfirst.frc.team3042.steamworksvision.VisionMode;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.HeartbeatMessage;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.OffWireMessage;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.VisionMessage;
@@ -64,7 +66,15 @@ public class RobotConnection {
         public void handleMessage(VisionMessage message) {
             if ("heartbeat".equals(message.getType())) {
                 lastHeartbeatReceived = System.currentTimeMillis();
+            } else if(message.getType().equals("targetType")){
+                if (message.getMessage() == "boiler") {
+                    VisionGLSurfaceView.visionMode = VisionMode.Boiler;
+                }else if(message.getMessage() == "lift"){
+                    VisionGLSurfaceView.visionMode = VisionMode.Lift;
+                }
             }
+
+
 
             Log.w("Connection" , message.getType() + " " + message.getMessage());
         }
