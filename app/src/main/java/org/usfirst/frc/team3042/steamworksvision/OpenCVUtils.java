@@ -182,7 +182,7 @@ public class OpenCVUtils {
 
         boilerLowerHull = calculateConvexHull(boilerTargetLower);
 
-        for(int i = 0; i<boilerLowerHull.length; i++){
+        for(int i = 0; i < boilerLowerHull.length; i++){
             boilerLowerHull[i].x+=cropX;
             boilerLowerHull[i].y+=cropY;
         }
@@ -190,7 +190,7 @@ public class OpenCVUtils {
         Point targetCenter = getConvexHullCenter(boilerUpperHull);
         Point targetCenter2 = getConvexHullCenter(boilerLowerHull);
 
-        int pixelDistance = (int) (targetCenter2.y-targetCenter.y);
+        Point absoluteCenter = getCenterOfCenters(targetCenter,targetCenter2);
 
         outputOverlayImage(contoursFrame, boilerUpperHull, boilerLowerHull);
 
@@ -219,9 +219,11 @@ public class OpenCVUtils {
         GLES20.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, outBuffer);
 
         if(targetFound) {
-            targets.add(new TargetInfo(pixelDistance, -9999, centerTopY, centerBottomY));
+            targets.add(new TargetInfo(absoluteCenter.x , absoluteCenter.y , targetCenter.y , targetCenter2.y));
             //Hello darkness my old friend... I've come to talk to you again...
-            //Hello darkness my old friend I've come to talk with you again because a vision softly creeping left its seeds while I was sleeping, and the vision that was planted in my brain still remains, within the sound of silence. In restless dreams I walked alone, narrow streets of cobble stone. Neath the halo of a street lamp I turned my collar to the cold and damn, when my eyes were stabbed by the flash of a neon light, that split the night. And touched the sound of silence. And in the naked light I saw, ten thousand people maybe more, people talking without speaking, people hearing without listening, people writing songs that voices never share and no one dared. Disturb the sound of silence. Fools, said I, you do not know, silence like a cancer grows, hear my words that I might teach you, take my arms that I might reach you. But my words, like silent raindrops fell, and echoed in the wells of silence. And the people bowed and prayed to the neon god they made and the sign flashed out its warning, in the words that it was forming and the sign said the words of the prophets are written on the subway walls, and tenement halls. And whispered in the sounds of silence.
+            //Hello darkness my old friend I've come to talk with you again because a vision softly creeoping left its seeds while I was sleeping, and the vision that was planted in my brain still remains, within the sound of silence. In restless dreams I walked alone, narrow streets of cobble stone. Neath the halo of a street lamp I turned my collar to the cold and damn, when my eyes were stabbed by the flash of a neon light, that split the night. And touched the sound of silence. And in the naked light I saw, ten thousand people maybe more, people talking without speaking, people hearing without listening, people writing songs that voices never share and no one dared. Disturb the sound of silence. Fools, said I, you do not know, silence like a cancer grows, hear my words that I might teach you, take my arms that I might reach you. But my words, like silent raindrops fell, and echoed in the wells of silence. And the people bowed and prayed to the neon god they made and the sign flashed out its warning, in the words that it was forming and the sign said the words of the prophets are written on the subway walls, and tenement halls. And whispered in the sounds of silence.
+            //kilimanjaro
+            //I see this mountain and I WANT IT PAINTED BLACK
         }
 
         return targets;
@@ -545,5 +547,12 @@ public class OpenCVUtils {
         Point center = new Point(avgX,avgY);
 
         return center;
+    }
+
+    private static Point getCenterOfCenters(Point topCenter, Point bottomCenter){
+        double averageX = (topCenter.x + bottomCenter.x)/2;
+        double averageY = (topCenter.y + bottomCenter.y)/2;
+
+        return new Point(averageX,averageY);
     }
 }

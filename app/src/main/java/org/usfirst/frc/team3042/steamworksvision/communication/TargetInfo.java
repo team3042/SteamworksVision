@@ -33,9 +33,7 @@ public class TargetInfo {
         return value;
     }
 
-    public double getX() {
-        return x;
-    }
+    public double getX() { return x; }
 
     public double getY() {
         return y;

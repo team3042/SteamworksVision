@@ -66,15 +66,13 @@ public class RobotConnection {
         public void handleMessage(VisionMessage message) {
             if ("heartbeat".equals(message.getType())) {
                 lastHeartbeatReceived = System.currentTimeMillis();
-            } else if(message.getType().equals("targetType")){
+            } else if(message.getType().equals("targetType")) {
                 if (message.getMessage() == "boiler") {
                     VisionGLSurfaceView.visionMode = VisionMode.Boiler;
-                }else if(message.getMessage() == "lift"){
+                } else if (message.getMessage() == "lift") {
                     VisionGLSurfaceView.visionMode = VisionMode.Lift;
                 }
             }
-
-
 
             Log.w("Connection" , message.getType() + " " + message.getMessage());
         }

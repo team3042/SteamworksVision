@@ -38,7 +38,7 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
     protected boolean outputHSVFrame = false;
 
     //Enum to control the vision mode
-    public static VisionMode visionMode = VisionMode.Boiler;
+    public static VisionMode visionMode = VisionMode.Lift;
 
     static BetterCamera2Renderer.Settings getCameraSettings() {
         BetterCamera2Renderer.Settings settings = new BetterCamera2Renderer.Settings();
@@ -63,7 +63,6 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
 
     @Override
     public void onCameraViewStarted(int width, int height) {
-
         frameCounter = 0;
         lastNanoTime = System.nanoTime();
     }
@@ -107,27 +106,38 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
             case Boiler:
                 targets = OpenCVUtils.processBoilerImage(texIn, texOut, width, height, hRange.first, hRange.second,
                         sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
+
+                for(TargetInfo currentTarget : targets) {
+                    double x = Math.atan((currentTarget.getX() - kCenterCol) / getFocalLengthPixels());
+                    double y = Math.atan((currentTarget.getY() - kCenterRow) / getFocalLengthPixels());
+
+                    double centerTopY = Math.atan((currentTarget.getCenterTopY() - kCenterRow) / getFocalLengthPixels());
+                    double centerBottomY = Math.atan((currentTarget.getCenterBottomY() - kCenterRow) / getFocalLengthPixels());
+
+                    // Distance calculation in inches determined by fitting curve to experimental data
+                    double distance = 0;
+
+                    Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + distance);
+                }
                 break;
             case Lift:
                 targets = OpenCVUtils.processImage(texIn, texOut, width, height, hRange.first, hRange.second,
                         sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
+
+                for(TargetInfo currentTarget : targets) {
+                    double x = Math.atan((currentTarget.getX() - kCenterCol) / getFocalLengthPixels());
+                    double y = Math.atan((currentTarget.getY() - kCenterRow) / getFocalLengthPixels());
+
+                    double centerTopY = Math.atan((currentTarget.getCenterTopY() - kCenterRow) / getFocalLengthPixels());
+                    double centerBottomY = Math.atan((currentTarget.getCenterBottomY() - kCenterRow) / getFocalLengthPixels());
+
+                    // Distance calculation in inches determined by fitting curve to experimental data
+                    double distance = 12 * (0.432 * Math.pow(Math.abs(centerBottomY - centerTopY), -0.95));
+
+                    visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, distance));
+                    Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + distance);
+                }
                 break;
-        }
-
-        for(int i = 0; i < targets.size(); i++) {
-            TargetInfo currentTarget = targets.get(i);
-
-            double x = Math.atan((currentTarget.getX() - kCenterCol) / getFocalLengthPixels());
-            double y = Math.atan((currentTarget.getY() - kCenterRow) / getFocalLengthPixels());
-
-            double centerTopY = Math.atan((currentTarget.getCenterTopY() - kCenterRow) / getFocalLengthPixels());
-            double centerBottomY = Math.atan((currentTarget.getCenterBottomY() - kCenterRow) / getFocalLengthPixels());
-
-            // Distance calculation in inches determined by fitting curve to experimental data
-            double distance = 12 * (0.432 * Math.pow(Math.abs(centerBottomY - centerTopY), -0.95));
-
-            visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, distance));
-            Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + distance);
         }
 
         if (robotConnection != null && targets.size() != 0) {
