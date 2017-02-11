@@ -115,13 +115,13 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
                     double centerBottomY = Math.atan((currentTarget.getCenterBottomY() - kCenterRow) / getFocalLengthPixels());
 
                     // Distance calculation in inches determined by fitting curve to experimental data
-                    double distance = 0;
+                    double distance = Math.abs(centerBottomY - centerTopY); // TODO: Calibrate
 
                     Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + distance);
                 }
                 break;
             case Lift:
-                targets = OpenCVUtils.processImage(texIn, texOut, width, height, hRange.first, hRange.second,
+                targets = OpenCVUtils.processLiftImage(texIn, texOut, width, height, hRange.first, hRange.second,
                         sRange.first, sRange.second, vRange.first, vRange.second, outputHSVFrame);
 
                 for(TargetInfo currentTarget : targets) {

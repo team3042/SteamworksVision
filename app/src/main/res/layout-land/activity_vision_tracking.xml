@@ -31,7 +31,17 @@
         android:layout_alignTop="@+id/fps_text_view"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="12dp"
-        android:id="@+id/connected"
+        android:id="@+id/connected_text_view"
+        android:textAppearance="@android:style/TextAppearance.Material.Medium"
+        android:textColor="@android:color/background_light" />
+
+    <TextView
+        android:text="@string/target"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/fps_text_view"
+        android:id="@+id/vision_mode_text_view"
         android:textAppearance="@android:style/TextAppearance.Material.Medium"
         android:textColor="@android:color/background_light" />
 

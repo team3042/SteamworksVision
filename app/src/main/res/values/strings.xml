@@ -22,4 +22,7 @@
     <string name="restore_defaults">Restore Defaults</string>
     <string name="s">S</string>
     <string name="v">V</string>
+    <string name="target">Target:</string>
+    <string name="target_lift">Target Lift</string>
+    <string name="target_boiler">Target Boiler</string>
 </resources>

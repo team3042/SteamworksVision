@@ -4,8 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-import org.usfirst.frc.team3042.steamworksvision.VisionGLSurfaceView;
-import org.usfirst.frc.team3042.steamworksvision.VisionMode;
+import org.usfirst.frc.team3042.steamworksvision.VisionModeStatusBroadcastReceiver;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.HeartbeatMessage;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.OffWireMessage;
 import org.usfirst.frc.team3042.steamworksvision.communication.messages.VisionMessage;
@@ -68,9 +67,9 @@ public class RobotConnection {
                 lastHeartbeatReceived = System.currentTimeMillis();
             } else if(message.getType().equals("targetType")) {
                 if (message.getMessage() == "boiler") {
-                    VisionGLSurfaceView.visionMode = VisionMode.Boiler;
+                    broadcastVisionModeBoiler();
                 } else if (message.getMessage() == "lift") {
-                    VisionGLSurfaceView.visionMode = VisionMode.Lift;
+                    broadcastVisionModeLift();
                 }
             }
 
@@ -261,6 +260,16 @@ public class RobotConnection {
 
     public void broadcastRobotDisconnected() {
         Intent i = new Intent(RobotConnectionStatusBroadcastReceiver.ACTION_ROBOT_DISCONNECTED);
+        context.sendBroadcast(i);
+    }
+
+    public void broadcastVisionModeLift() {
+        Intent i = new Intent(VisionModeStatusBroadcastReceiver.ACTION_VISION_MODE_LIFT);
+        context.sendBroadcast(i);
+    }
+
+    public void broadcastVisionModeBoiler() {
+        Intent i = new Intent(VisionModeStatusBroadcastReceiver.ACTION_VISION_MODE_BOILER);
         context.sendBroadcast(i);
     }
 }

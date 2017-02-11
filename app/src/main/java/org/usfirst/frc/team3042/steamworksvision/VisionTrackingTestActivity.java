@@ -28,16 +28,17 @@ import org.opencv.android.OpenCVLoader;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
 
-public class VisionTrackingTestActivity extends AppCompatActivity implements RobotConnectionStateListener {
+public class VisionTrackingTestActivity extends AppCompatActivity implements RobotConnectionStateListener, VisionModeStateListener {
 
     private static final int REQUEST_CAMERA_PERMISSION = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
 
-    TextView isConnected;
-    RobotConnectionStatusBroadcastReceiver connectionReceiver;
+    TextView isConnected, targetType;
+    MenuItem targetLift, targetBoiler;
     private VisionGLSurfaceView view;
     private Preferences prefs;
-    private RobotConnectionStatusBroadcastReceiver receiver;
+    private RobotConnectionStatusBroadcastReceiver connectionReceiver;
+    private VisionModeStatusBroadcastReceiver visionModeReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +55,16 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
         }
 
         prefs = new Preferences(this);
-        receiver = new RobotConnectionStatusBroadcastReceiver(this, this);
+        connectionReceiver = new RobotConnectionStatusBroadcastReceiver(this, this);
+        visionModeReceiver = new VisionModeStatusBroadcastReceiver(this, this);
 
         tryStartCamera();
 
-        isConnected = (TextView)findViewById(R.id.connected);
+        isConnected = (TextView)findViewById(R.id.connected_text_view);
+        targetType = (TextView)findViewById(R.id.vision_mode_text_view);
+
+        targetBoiler = (MenuItem)findViewById(R.id.target_boiler);
+        targetLift = (MenuItem)findViewById(R.id.target_lift);
 
     }
 
@@ -117,11 +123,36 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
         TextView tv = (TextView) findViewById(R.id.fps_text_view);
     }
 
+    // Methods for checking menu boxes, !checked is future state of the box in each method
     public boolean onHSVCheckboxClicked(MenuItem item) {
         boolean checked = item.isChecked();
         item.setChecked(!checked);
 
         view.setOutputHSVFrame(!checked);
+
+        return true;
+    }
+
+    public boolean onTargetLiftClicked(MenuItem item) {
+        boolean checked = item.isChecked();
+
+        if (!checked) {
+            AppContext.getRobotConnection().broadcastVisionModeLift();
+        } else {
+            AppContext.getRobotConnection().broadcastVisionModeBoiler();
+        }
+
+        return true;
+    }
+
+    public boolean onTargetBoilerClicked(MenuItem item) {
+        boolean checked = item.isChecked();
+
+        if (!checked) {
+            AppContext.getRobotConnection().broadcastVisionModeBoiler();
+        } else {
+            AppContext.getRobotConnection().broadcastVisionModeLift();
+        }
 
         return true;
     }
@@ -219,6 +250,24 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.options_menu, menu);
         return true;
+    }
+
+    @Override
+    public void setVisionModeLift() {
+        targetType.setText("Target: Lift");
+        targetBoiler.setChecked(false);
+        targetLift.setChecked(true);
+
+        view.visionMode = VisionMode.Lift;
+    }
+
+    @Override
+    public void setVisionModeBoiler() {
+        targetType.setText("Target: Boiler");
+        targetBoiler.setChecked(true);
+        targetLift.setChecked(false);
+
+        view.visionMode = VisionMode.Boiler;
     }
 
     public static boolean isInteger(String s) {

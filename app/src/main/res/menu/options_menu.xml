@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:title="@string/target_lift"
+        android:checkable="true"
+        android:id="@+id/target_lift"
+        android:onClick="onTargetLiftClicked"/>
+    <item android:title="@string/target_boiler"
+        android:checkable="true"
+        android:id="@+id/target_boiler"
+        android:onClick="onTargetBoilerClicked"/>
     <item android:title="@string/hsv_view_mode"
         android:checkable="true"
         android:id="@+id/hsv_view"

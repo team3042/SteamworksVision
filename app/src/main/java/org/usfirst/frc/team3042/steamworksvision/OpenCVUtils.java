@@ -65,8 +65,8 @@ public class OpenCVUtils {
     private static double filterContoursMinRatio = 0.3;
     private static double filterContoursMaxRatio = 0.6;
 
-    public static ArrayList<TargetInfo> processImage(int texIn, int texOut, int width, int height, int lowerH, int upperH,
-                                              int lowerS, int upperS, int lowerV, int upperV, boolean outputHSVFrame) {
+    public static ArrayList<TargetInfo> processLiftImage(int texIn, int texOut, int width, int height, int lowerH, int upperH,
+                                                         int lowerS, int upperS, int lowerV, int upperV, boolean outputHSVFrame) {
         ArrayList<TargetInfo> targets = new ArrayList<>();
         stencil = new Mat(8, 1, CvType.CV_32SC2);
         stencil.put(0, 0, new int[]{/*p1*/0, 0, /*p2*/ 0, 50, /*p3*/ 20, 50, /*p4*/ 20, 0});
