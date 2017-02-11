@@ -126,7 +126,7 @@ public class OpenCVUtils {
             outBuffer = ByteBuffer.wrap(output);
         }
 
-        releaseMats();
+        releaseMatsLift();
 
         GLES20.glActiveTexture(GL_TEXTURE0);
         GLES20.glBindTexture(GL_TEXTURE_2D, texOut);
@@ -172,27 +172,38 @@ public class OpenCVUtils {
 
         boilerTargetUpper = processContoursBoiler(contours);
 
-        boilerUpperHull = calculateConvexHull(boilerTargetUpper);
+        if (boilerTargetUpper != null) {
+            boilerUpperHull = calculateConvexHull(boilerTargetUpper);
 
-        Mat croppedImage = boilerCropImage(boilerUpperHull, boilerDilatedFrame);
+            Mat croppedImage = boilerCropImage(boilerUpperHull, boilerDilatedFrame);
 
-        List<MatOfPoint> croppedContours = getContours(croppedImage);
+            List<MatOfPoint> croppedContours = getContours(croppedImage);
 
-        boilerTargetLower = processContoursBoiler(croppedContours);
+            boilerTargetLower = processContoursBoiler(croppedContours);
 
-        boilerLowerHull = calculateConvexHull(boilerTargetLower);
+            boilerLowerHull = calculateConvexHull(boilerTargetLower);
 
-        for(int i = 0; i < boilerLowerHull.length; i++){
-            boilerLowerHull[i].x+=cropX;
-            boilerLowerHull[i].y+=cropY;
+            for (int i = 0; i < boilerLowerHull.length; i++) {
+                boilerLowerHull[i].x += cropX;
+                boilerLowerHull[i].y += cropY;
+            }
+
+            Point targetCenter = getConvexHullCenter(boilerUpperHull);
+            Point targetCenter2 = getConvexHullCenter(boilerLowerHull);
+
+            Point absoluteCenter = getCenterOfCenters(targetCenter, targetCenter2);
+
+            outputOverlayImage(contoursFrame, boilerUpperHull, boilerLowerHull);
+
+
+            if(targetFound) {
+                targets.add(new TargetInfo(absoluteCenter.x , absoluteCenter.y , targetCenter.y , targetCenter2.y));
+                //Hello darkness my old friend... I've come to talk to you again...
+                //Hello darkness my old friend I've come to talk with you again because a vision softly creeoping left its seeds while I was sleeping, and the vision that was planted in my brain still remains, within the sound of silence. In restless dreams I walked alone, narrow streets of cobble stone. Neath the halo of a street lamp I turned my collar to the cold and damn, when my eyes were stabbed by the flash of a neon light, that split the night. And touched the sound of silence. And in the naked light I saw, ten thousand people maybe more, people talking without speaking, people hearing without listening, people writing songs that voices never share and no one dared. Disturb the sound of silence. Fools, said I, you do not know, silence like a cancer grows, hear my words that I might teach you, take my arms that I might reach you. But my words, like silent raindrops fell, and echoed in the wells of silence. And the people bowed and prayed to the neon god they made and the sign flashed out its warning, in the words that it was forming and the sign said the words of the prophets are written on the subway walls, and tenement halls. And whispered in the sounds of silence.
+                //kilimanjaro
+                //I see this mountain and I WANT IT PAINTED BLACK
+            }
         }
-
-        Point targetCenter = getConvexHullCenter(boilerUpperHull);
-        Point targetCenter2 = getConvexHullCenter(boilerLowerHull);
-
-        Point absoluteCenter = getCenterOfCenters(targetCenter,targetCenter2);
-
-        outputOverlayImage(contoursFrame, boilerUpperHull, boilerLowerHull);
 
         // Outputting Mat to the screen
         ByteBuffer outBuffer;
@@ -212,35 +223,41 @@ public class OpenCVUtils {
             outBuffer = ByteBuffer.wrap(output);
         }
 
-        releaseMats();
+        releaseMatsBoiler();
 
         GLES20.glActiveTexture(GL_TEXTURE0);
         GLES20.glBindTexture(GL_TEXTURE_2D, texOut);
         GLES20.glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, outBuffer);
 
-        if(targetFound) {
-            targets.add(new TargetInfo(absoluteCenter.x , absoluteCenter.y , targetCenter.y , targetCenter2.y));
-            //Hello darkness my old friend... I've come to talk to you again...
-            //Hello darkness my old friend I've come to talk with you again because a vision softly creeoping left its seeds while I was sleeping, and the vision that was planted in my brain still remains, within the sound of silence. In restless dreams I walked alone, narrow streets of cobble stone. Neath the halo of a street lamp I turned my collar to the cold and damn, when my eyes were stabbed by the flash of a neon light, that split the night. And touched the sound of silence. And in the naked light I saw, ten thousand people maybe more, people talking without speaking, people hearing without listening, people writing songs that voices never share and no one dared. Disturb the sound of silence. Fools, said I, you do not know, silence like a cancer grows, hear my words that I might teach you, take my arms that I might reach you. But my words, like silent raindrops fell, and echoed in the wells of silence. And the people bowed and prayed to the neon god they made and the sign flashed out its warning, in the words that it was forming and the sign said the words of the prophets are written on the subway walls, and tenement halls. And whispered in the sounds of silence.
-            //kilimanjaro
-            //I see this mountain and I WANT IT PAINTED BLACK
-        }
-
         return targets;
     }
 
     // Releases all Mats to keep memory clear
-    private static void releaseMats() {
+    private static void releaseMatsLift() {
+        filteredFrame.release();
+        erodedFrame.release();
+        dilatedFrame.release();
+
+        target[0].release();
+        target[1].release();
+
+        for(int i = 0; i < contours.size(); i++) {
+            contours.get(i).release();
+        }
+    }
+
+    private static void releaseMatsBoiler() {
         filteredFrame.release();
         erodedFrame.release();
         dilatedFrame.release();
         boilerDilatedFrame.release();
 
-        target[0].release();
-        target[1].release();
-
-        boilerTargetUpper.release();
-        boilerTargetLower.release();
+        if(boilerTargetUpper != null) {
+            boilerTargetUpper.release();
+        }
+        if(boilerTargetLower != null) {
+            boilerTargetLower.release();
+        }
 
         for(int i = 0; i < contours.size(); i++) {
             contours.get(i).release();
@@ -423,7 +440,12 @@ public class OpenCVUtils {
 
     // Calculating the convex hull of a roughly rectangular contour
     private static Point[] calculateConvexHull(MatOfPoint contour) {
-        Point[] targetPoints = contour.toArray();
+        Point[] targetPoints;
+        if(contour != null) {
+            targetPoints = contour.toArray();
+        } else {
+            targetPoints = new Point[0];
+        }
         Point[] convexHull = new Point[4];
         convexHull[0] = new Point(10000, 10000);
         convexHull[1] = new Point(0, 10000);
@@ -482,10 +504,14 @@ public class OpenCVUtils {
 
         MatOfPoint targetContour;
         if(mostSimilarGoal == -1) {
+            targetFound = false;
+
             System.out.println("No similar contour found");
-            targetContour = new MatOfPoint();
+            targetContour = null;
         }
         else {
+            targetFound = true;
+
             targetContour = contours.get(mostSimilarGoal);
         }
 

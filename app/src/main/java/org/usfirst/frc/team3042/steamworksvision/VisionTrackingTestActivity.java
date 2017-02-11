@@ -34,7 +34,6 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
     private static final String FRAGMENT_DIALOG = "dialog";
 
     TextView isConnected, targetType;
-    MenuItem targetLift, targetBoiler;
     private VisionGLSurfaceView view;
     private Preferences prefs;
     private RobotConnectionStatusBroadcastReceiver connectionReceiver;
@@ -62,9 +61,6 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
 
         isConnected = (TextView)findViewById(R.id.connected_text_view);
         targetType = (TextView)findViewById(R.id.vision_mode_text_view);
-
-        targetBoiler = (MenuItem)findViewById(R.id.target_boiler);
-        targetLift = (MenuItem)findViewById(R.id.target_lift);
 
     }
 
@@ -255,8 +251,6 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
     @Override
     public void setVisionModeLift() {
         targetType.setText("Target: Lift");
-        targetBoiler.setChecked(false);
-        targetLift.setChecked(true);
 
         view.visionMode = VisionMode.Lift;
     }
@@ -264,8 +258,6 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
     @Override
     public void setVisionModeBoiler() {
         targetType.setText("Target: Boiler");
-        targetBoiler.setChecked(true);
-        targetLift.setChecked(false);
 
         view.visionMode = VisionMode.Boiler;
     }
