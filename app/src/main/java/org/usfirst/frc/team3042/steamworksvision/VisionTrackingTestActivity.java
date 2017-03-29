@@ -25,8 +25,10 @@ import android.widget.TextView;
 
 import org.florescu.android.rangeseekbar.RangeSeekBar;
 import org.opencv.android.OpenCVLoader;
+import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnection;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStateListener;
 import org.usfirst.frc.team3042.steamworksvision.communication.RobotConnectionStatusBroadcastReceiver;
+import org.usfirst.frc.team3042.steamworksvision.communication.messages.OffWireMessage;
 
 public class VisionTrackingTestActivity extends AppCompatActivity implements RobotConnectionStateListener, VisionModeStateListener {
 
@@ -232,6 +234,15 @@ public class VisionTrackingTestActivity extends AppCompatActivity implements Rob
         isConnected.setText("Connected");
 
         view.setRobotConnection(AppContext.getRobotConnection());
+
+        switch(VisionGLSurfaceView.visionMode) {
+            case Boiler:
+                AppContext.getRobotConnection().send(new OffWireMessage("Boiler"));
+                break;
+            case Lift:
+                AppContext.getRobotConnection().send(new OffWireMessage("Lift"));
+                break;
+        }
     }
 
     @Override

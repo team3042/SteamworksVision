@@ -23,9 +23,9 @@ public class VisionModeStatusBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (ACTION_VISION_MODE_LIFT.equals(intent.getAction())) {
-            listener.setVisionModeLift();
+            //listener.setVisionModeLift();
         } else if (ACTION_VISION_MODE_BOILER.equals(intent.getAction())) {
-            listener.setVisionModeBoiler();
+            //listener.setVisionModeBoiler();
         }
     }
 }
