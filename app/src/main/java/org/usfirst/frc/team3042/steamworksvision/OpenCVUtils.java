@@ -550,7 +550,12 @@ public class OpenCVUtils {
 
         Rect cropROI = new Rect( x, y, width, height);
 
-        Mat cropped = new Mat(image, cropROI);
+        Mat cropped = image;
+        try {
+            cropped = new Mat(image, cropROI);
+        }catch(Exception e){
+            //
+        }
 
         cropX = x;
         cropY = y;
