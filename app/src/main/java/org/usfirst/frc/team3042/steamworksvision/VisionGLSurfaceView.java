@@ -117,6 +117,7 @@ public class VisionGLSurfaceView extends BetterCameraGLSurfaceView implements Be
                     // Distance calculation in inches determined by fitting curve to experimental data
                     double distance = Math.abs(centerBottomY - centerTopY); // TODO: Calibrate
 
+                    visionUpdate.addCameraTargetInfo(new TargetInfo(x, y, distance));
                     Log.i(LOGTAG, "Target at: (" + x + ", " + y + ") with distance: " + distance);
                 }
                 break;
